@@ -2,18 +2,25 @@ FROM apache/airflow:2.10.4
 
 USER root
 
-# Install system dependencies if needed
+# Install system dependencies and Git
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
+        git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Switch back to airflow user
 USER airflow
 
+# Set Git environment variable to silence the warning
+ENV GIT_PYTHON_REFRESH=quiet
+
 # Copy requirements file
 COPY --chown=airflow:root requirements.txt /opt/airflow/requirements.txt
 
 # Install Python packages
 RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+# Set MLflow tracking URI environment variable
+ENV MLFLOW_TRACKING_URI=http://mlflow:5000

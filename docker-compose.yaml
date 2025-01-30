@@ -286,14 +286,20 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  mlflow-server:
+  mlflow:
     build:
       context: .
       dockerfile: Dockerfile.mlflow
     ports:
       - "5000:5000"
+    command: mlflow server --host 0.0.0.0 --port 5000
     volumes:
       - mlflow-data:/mlflow
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   mlflow-data:
