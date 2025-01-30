@@ -2,7 +2,7 @@ FROM python:3.12.1-slim
 
 WORKDIR /mlflow
 
-RUN pip install mlflow
+RUN pip install mlflow psycopg2-binary
 
 ENV BACKEND_URI sqlite:///mlflow.db
 
