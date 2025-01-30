@@ -1,8 +1,19 @@
 FROM apache/airflow:2.10.4
 
-RUN pip install -U pip --upgrade pip
+USER root
 
-COPY requirements.txt /requirements.txt
+# Install system dependencies if needed
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir --user -r /requirements.txt
+# Switch back to airflow user
+USER airflow
 
+# Copy requirements file
+COPY --chown=airflow:root requirements.txt /opt/airflow/requirements.txt
+
+# Install Python packages
+RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
