@@ -16,5 +16,4 @@ docker-compose up -d
 
 Now go to the http://localhost:8080/ and log in using user airflow and password airflow.
 
-With the running containers you can access:
 mlflow ui: http://localhost:5000
