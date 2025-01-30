@@ -4,4 +4,4 @@ pandas
 requests
 xgboost
 optuna
-mlflow
+mlflow>=2.8.0

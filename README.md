@@ -8,6 +8,8 @@ For instance 2.10.4 in this case. Get the docker-compose file (change version in
 echo -e "AIRFLOW_UID=$(id -u)" > .env
 ```
 
+If requirements.txt is changed then run `docker-compose build` to build the images.
+
 Setup and start:
 ```bash
 docker-compose up airflow-init
@@ -16,4 +18,9 @@ docker-compose up -d
 
 Now go to the http://localhost:8080/ and log in using user airflow and password airflow.
 
-mlflow ui: http://localhost:5000
+Mlflow tracking server with the following configuration:
+ * Tracking: local
+ * Artifact Store: local
+ * Backend: sqlite (local)
+
+MLFlow ui: http://localhost:5000
