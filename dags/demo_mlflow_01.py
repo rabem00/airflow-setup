@@ -7,9 +7,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
+# Set MLflow Tracking URI
+MLFLOW_TRACKING_URI = "http://mlflow:5000"
+
 # Define default arguments
 default_args = {
-    'owner': 'data_scientist',
+    'owner': 'Marco Rabelink',
     'depends_on_past': False,
     'start_date': datetime(2025, 1, 30),
     'email_on_failure': False,
@@ -37,25 +40,34 @@ def preprocess_data(**context):
     )
     
     # Push to XCom for next tasks
-    context['task_instance'].xcom_push(key='X_train', value=X_train.to_dict())
-    context['task_instance'].xcom_push(key='X_test', value=X_test.to_dict())
-    context['task_instance'].xcom_push(key='y_train', value=y_train.to_list())
-    context['task_instance'].xcom_push(key='y_test', value=y_test.to_list())
+    context['task_instance'].xcom_push(key='X_train', value=X_train.to_json())
+    context['task_instance'].xcom_push(key='X_test', value=X_test.to_json())
+    context['task_instance'].xcom_push(key='y_train', value=y_train.tolist())
+    context['task_instance'].xcom_push(key='y_test', value=y_test.tolist())
 
 def train_model(**context):
     """Train the model and log metrics using MLflow"""
     # Get data from XCom
     ti = context['task_instance']
-    X_train = pd.DataFrame(ti.xcom_pull(key='X_train'))
+    X_train = pd.read_json(ti.xcom_pull(key='X_train'))
     y_train = ti.xcom_pull(key='y_train')
-    X_test = pd.DataFrame(ti.xcom_pull(key='X_test'))
+    X_test = pd.read_json(ti.xcom_pull(key='X_test'))
     y_test = ti.xcom_pull(key='y_test')
     
-    # Start MLflow run
-    with mlflow.start_run():
-        # Set tracking URI - replace with your MLflow server URI
-        mlflow.set_tracking_uri('http://localhost:5000')
-        
+    # Set tracking URI before starting MLflow run
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+
+    # Ensure the experiment exists and retrieve its ID
+    experiment_name = "random_forest_model"
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+
+    if experiment is None:
+        experiment_id = mlflow.create_experiment(experiment_name)
+    else:
+        experiment_id = experiment.experiment_id
+
+    # Start MLflow run with the correct experiment
+    with mlflow.start_run(experiment_id=experiment_id):
         # Train model
         rf = RandomForestClassifier(n_estimators=100, random_state=42)
         rf.fit(X_train, y_train)
@@ -78,14 +90,21 @@ def train_model(**context):
             'recall': recall
         })
         
-        # Log model
-        mlflow.sklearn.log_model(rf, "random_forest_model")
+        # Define an input example (first row of X_train)
+        input_example = X_train.iloc[:1]
+
+        # Log model with input example to fix warning
+        mlflow.sklearn.log_model(
+            rf,
+            "random_forest_model",
+            input_example=input_example
+        )
 
 # Create DAG
 dag = DAG(
-    'mlflow_training_pipeline',
+    '01_mlflow_training_pipeline',
     default_args=default_args,
-    description='A simple ML training pipeline with MLflow integration',
+    description='A simple ML training pipeline with MLflow integration and model output',
     schedule_interval=timedelta(days=1),
     catchup=False
 )

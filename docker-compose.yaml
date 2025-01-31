@@ -20,7 +20,7 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     MLFLOW_TRACKING_URI: "http://mlflow:5000"
-    JWT_SECRET_KEY: "my-secret-key"
+    AIRFLOW__WEBSERVER__SECRET_KEY: "my_super_secret_key"
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -37,6 +37,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - mlflow-data:/mlflow  # Ensure Airflow has access to MLflow artifacts
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -253,7 +254,6 @@ services:
       MLFLOW_TRACKING_URI: "http://0.0.0.0:5000"
       MLFLOW_BACKEND_STORE_URI: "postgresql://airflow:airflow@postgres:5432/mlflow"
       MLFLOW_DEFAULT_ARTIFACT_ROOT: "/mlflow/artifacts"
-      JWT_SECRET_KEY: "my-secret-key"
     volumes:
       - mlflow-data:/mlflow
     ports:
