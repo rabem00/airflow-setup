@@ -104,7 +104,7 @@ def train_model(**context):
 dag = DAG(
     '01_mlflow_training_pipeline',
     default_args=default_args,
-    description='A simple ML training pipeline with MLflow integration and model output',
+    description='A ML training pipeline with MLflow integration - random_forest_model',
     schedule_interval=None,  # Manual trigger only
     catchup=False
 )

@@ -1,0 +1,1 @@
+Note: for demo_mlflow_02_helper.py to work the model of demo_mlflow_01.py should be registered in MLFlow as random_forest_model.
