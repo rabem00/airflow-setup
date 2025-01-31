@@ -105,7 +105,7 @@ dag = DAG(
     '01_mlflow_training_pipeline',
     default_args=default_args,
     description='A simple ML training pipeline with MLflow integration and model output',
-    schedule_interval=timedelta(days=1),
+    schedule_interval=None,  # Manual trigger only
     catchup=False
 )
 

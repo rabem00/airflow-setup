@@ -21,8 +21,8 @@ default_args = {
 def list_registered_models():
     """List all registered models in MLflow"""
     client = mlflow.MlflowClient()
-    models = client.list_registered_models()
-    
+    models = client.search_registered_models()
+
     for model in models:
         print(f"Model: {model.name}, Latest Version: {model.latest_versions}")
 
@@ -31,17 +31,25 @@ def get_model_details():
     client = mlflow.MlflowClient()
     model_name = "random_forest_model"
 
-    model_versions = client.get_latest_versions(model_name)
+    # < Airflow 2.9.0    
+    # model_versions = client.get_latest_versions(model_name)
+
+    # for mv in model_versions:
+    #   print(f"Version: {mv.version}, Artifact Path: {mv.source}")
+
+    # get_latest_versions is deprecated in 2.9.0 now search_model_versions
+    # Search for all versions of the model
+    model_versions = client.search_model_versions(f"name='{model_name}'")
 
     for mv in model_versions:
-        print(f"Version: {mv.version}, Artifact Path: {mv.source}")
+        print(f"Model: {mv.name}, Version: {mv.version}, Source: {mv.source}, Status: {mv.status}")
 
 # Define DAG
 dag = DAG(
-    "mlflow_model_retrieval",
+    "02_mlflow_model_retrieval",
     default_args=default_args,
     description="DAG to list registered models and retrieve model details from MLflow",
-    schedule_interval=timedelta(days=1),
+    schedule_interval=None,  # Manual trigger only
     catchup=False,
 )
 
