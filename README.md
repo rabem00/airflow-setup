@@ -1,12 +1,6 @@
 # Airflow with MLFlow integration
 This repository contains a docker-compose example of Airflow with MLFlow integration. You can use it on a laptop with docker-desktop installed. It also contains some simple DAG files to test various MLFlow features.
 
-## Get latest Airflow release
-In this case get latest release 2.10.4:
-https://airflow.apache.org/docs/apache-airflow/stable/release_notes.html
-
-Get the docker-compose file (change Airflow version in URL for other docker-compose files): https://airflow.apache.org/docs/apache-airflow/2.10.4/docker-compose.yaml
-
 ## Setup
 After cloning this repository create the following:
 ```bash
@@ -35,3 +29,11 @@ Mlflow tracking server with the following configuration:
  * Backend: sqlite (local)
 
 MLFlow UI: http://0.0.0.0:5000
+
+## Create new Version with latest Airflow release
+In this case get latest release 2.10.4:
+https://airflow.apache.org/docs/apache-airflow/stable/release_notes.html
+
+Get the docker-compose file (change Airflow version in URL for other docker-compose files): https://airflow.apache.org/docs/apache-airflow/2.10.4/docker-compose.yaml
+
+Compare the docker-compose file in this repository with the downloaded one and make the nessecary changes.
