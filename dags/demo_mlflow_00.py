@@ -21,10 +21,17 @@ def train_model():
     # Set tracking URI before starting MLflow run
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     
-    with mlflow.start_run():
-        # Set experiment name
-        mlflow.set_experiment("minimal")
-        
+    # Ensure the experiment exists and retrieve its ID
+    experiment_name = "minimal"
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+
+    if experiment is None:
+        experiment_id = mlflow.create_experiment(experiment_name)
+    else:
+        experiment_id = experiment.experiment_id
+
+    # Start MLflow run with the correct experiment
+    with mlflow.start_run(experiment_id=experiment_id):       
         mlflow.log_param("param1", 42)
         mlflow.log_metric("accuracy", 0.95)
 

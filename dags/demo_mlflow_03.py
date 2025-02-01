@@ -1,6 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
+from datetime import datetime, timedelta
 import mlflow
 import mlflow.sklearn
 from sklearn.pipeline import Pipeline
@@ -25,10 +25,32 @@ FEATURES = [
     "dropoff_longitude",
 ]
 
+# Define default arguments
+default_args = {
+    'owner': 'Marco Rabelink',
+    'depends_on_past': False,
+    'start_date': datetime(2025, 1, 30),
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5)
+}
+
 MLFLOW_TRACKING_URI = "http://mlflow:5000"
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-mlflow.set_experiment("fare_regression_model")
 
+# If the mlflow.set_experiment is used then during the dag import
+# the experiment is already created. But if someone removes the experiment
+# the dag gives an import error.
+# mlflow.set_experiment("fare_regression_model")
+# The following is a better solution.
+experiment_name = "fare_regression_model"
+experiment = mlflow.get_experiment_by_name(experiment_name)
+
+if experiment is None:
+    experiment_id = mlflow.create_experiment(experiment_name)
+else:
+    experiment_id = experiment.experiment_id
 
 def make_random_forest():
     """Builds a Random Forest model pipeline."""
@@ -89,7 +111,8 @@ def model(**kwargs):
 
     rf_model = make_random_forest()
 
-    with mlflow.start_run():
+    # Start MLflow run with the correct experiment
+    with mlflow.start_run(experiment_id=experiment_id): 
         rf_model.fit(X_train, y_train)
 
         # Log parameters
@@ -120,8 +143,8 @@ def evaluate(**kwargs):
     model_rmse = mse(y_test, y_pred, squared=False)
     baseline_rmse = mse(y_test, y_baseline_pred, squared=False)
 
-    # Log metrics
-    with mlflow.start_run():
+    # Start MLflow run with the correct experiment
+    with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_metric("model_rmse", model_rmse)
         mlflow.log_metric("baseline_rmse", baseline_rmse)
 
@@ -143,7 +166,7 @@ def create_report(**kwargs):
     plot_image = plot(y_test, y_pred)
 
     # Log the plot to MLflow
-    with mlflow.start_run():
+    with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_artifact(plot_image, artifact_path="plots")
 
     print("# Model Report")
@@ -153,7 +176,7 @@ def create_report(**kwargs):
 
 with DAG(
     "03_mlflow_training_pipeline",
-    default_args={"start_date": datetime(2025, 1, 1)},
+    default_args=default_args,
     description='A ML training pipeline with MLflow - fare_regression_flow',
     schedule_interval=None,
     catchup=False,
