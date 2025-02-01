@@ -1,10 +1,24 @@
 FROM python:3.12.1-slim
 
-WORKDIR /mlflow
+# WORKDIR /mlflow
 
 RUN pip install mlflow psycopg2-binary
 
 ENV BACKEND_URI sqlite:///mlflow.db
+
+# Accept UID from build arguments
+ARG AIRFLOW_UID=502
+
+# Create a non-root user dynamically
+RUN groupadd -g $AIRFLOW_UID airflow && \
+    useradd -u $AIRFLOW_UID -g airflow -m airflow
+
+# Create directory with correct ownership
+RUN mkdir -p /mlflow/artifacts && \
+    chown -R airflow:airflow /mlflow
+
+# Switch to non-root user
+USER airflow
 
 EXPOSE 5000
 

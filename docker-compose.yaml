@@ -250,6 +250,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.mlflow
+      args:
+        AIRFLOW_UID: ${AIRFLOW_UID}
     environment:
       MLFLOW_TRACKING_URI: "http://0.0.0.0:5000"
       MLFLOW_BACKEND_STORE_URI: "postgresql://airflow:airflow@postgres:5432/mlflow"
