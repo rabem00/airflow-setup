@@ -103,7 +103,8 @@ def train_model(**context):
 
 def register_model():
     client = mlflow.tracking.MlflowClient()
-    run_id = client.search_runs(experiment_ids=["0"], order_by=["metrics.accuracy DESC"])[0].info.run_id
+    experiment = client.get_experiment_by_name("random_forest_model")
+    run_id = client.search_runs(experiment_ids=[experiment.experiment_id], order_by=["metrics.accuracy DESC"])[0].info.run_id
     mlflow.register_model(f"runs:/{run_id}/model", "random_forest_model")
 
 # Create DAG
@@ -136,4 +137,4 @@ register_task = PythonOperator(
 )
 
 # Set task dependencies
-preprocess_task >> train_task
+preprocess_task >> train_task >> register_task

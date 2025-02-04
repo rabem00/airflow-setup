@@ -19,6 +19,7 @@ Start the airflow and mlflow instances:
 ```bash
 docker-compose up -d
 ```
+Note: may take some minutes to start, until you see http://0.0.0.0:8080 in the log (or if started without -d on the screen). 
 
 ## UI Connections
 Now go to the http://0.0.0.0:8080/ and log in using user airflow and password airflow.
