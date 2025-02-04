@@ -1,8 +1,6 @@
 # Airflow with MLFlow integration
 This repository contains a docker-compose example of Airflow with MLFlow integration. You can use it on a laptop with docker-desktop installed. It also contains some simple DAG files to test various MLFlow features.
 
-Note: for demo_mlflow_02_helper.py to work the model of demo_mlflow_01.py should be registered in MLFlow as random_forest_model registered model.
-
 ## Setup
 After cloning this repository create the following:
 ```bash

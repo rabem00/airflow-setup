@@ -56,6 +56,7 @@ def train_model(**context):
     
     # Set tracking URI before starting MLflow run
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    #mlflow.tracking.MlflowClient().delete_experiment("2")
 
     # Ensure the experiment exists and retrieve its ID
     experiment_name = "random_forest_model"
@@ -100,6 +101,11 @@ def train_model(**context):
             input_example=input_example
         )
 
+def register_model():
+    client = mlflow.tracking.MlflowClient()
+    run_id = client.search_runs(experiment_ids=["0"], order_by=["metrics.accuracy DESC"])[0].info.run_id
+    mlflow.register_model(f"runs:/{run_id}/model", "random_forest_model")
+
 # Create DAG
 dag = DAG(
     '01_mlflow_training_pipeline',
@@ -122,6 +128,11 @@ train_task = PythonOperator(
     python_callable=train_model,
     provide_context=True,
     dag=dag
+)
+
+register_task = PythonOperator(
+        task_id="register_model",
+        python_callable=register_model
 )
 
 # Set task dependencies

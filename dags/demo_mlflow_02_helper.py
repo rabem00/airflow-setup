@@ -31,13 +31,6 @@ def get_model_details():
     client = mlflow.MlflowClient()
     model_name = "random_forest_model"
 
-    # < Airflow 2.9.0    
-    # model_versions = client.get_latest_versions(model_name)
-
-    # for mv in model_versions:
-    #   print(f"Version: {mv.version}, Artifact Path: {mv.source}")
-
-    # get_latest_versions is deprecated in 2.9.0 now search_model_versions
     # Search for all versions of the model
     model_versions = client.search_model_versions(f"name='{model_name}'")
 
