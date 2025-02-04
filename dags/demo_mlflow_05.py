@@ -19,7 +19,7 @@ mlflow.set_tracking_uri("http://mlflow:5000")
 
 # Define default arguments for the DAG
 default_args = {
-    'owner': 'Your Name',
+    'owner': 'M Rabelink',
     'depends_on_past': False,
     'start_date': datetime(2025, 1, 30),
     'email_on_failure': False,
